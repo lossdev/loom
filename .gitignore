@@ -1,0 +1,13 @@
+**/.idea
+**/node_modules
+**/bin
+**/obj
+**/.DS_Store
+**/*.log
+
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/pnpm-debug.log*
+ui/dist
+ui/README.md
