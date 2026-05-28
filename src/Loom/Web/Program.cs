@@ -1,4 +1,4 @@
-namespace web;
+namespace Loom.Web;
 
 public class Program
 {

@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="apphost/apphost.csproj" />
-  <Project Path="core/core.csproj" />
-  <Project Path="web/web.csproj" />
+  <Project Path="src/Loom/AppHost/AppHost.csproj" />
+  <Project Path="src/Loom/Core/Core.csproj" />
+  <Project Path="src/Loom/Web/Web.csproj" />
 </Solution>
