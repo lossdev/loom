@@ -6,6 +6,8 @@
 **/*.log
 **/.yarn
 
+.editorconfig
+
 src/Loom/UI/npm-debug.log*
 src/Loom/UI/yarn-debug.log*
 src/Loom/UI/yarn-error.log*
