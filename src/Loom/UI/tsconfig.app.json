@@ -6,6 +6,10 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shadcn/*": ["./src/shadcn/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
