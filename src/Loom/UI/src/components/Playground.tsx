@@ -4,12 +4,16 @@ import type { Network } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@shadcn/components/ui/dropdown-menu.tsx";
-import {Button} from "@shadcn/components/ui/button.tsx";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import { Button } from "@shadcn/components/ui/button.tsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faNetworkWired, faWrench } from "@fortawesome/free-solid-svg-icons";
+import { faDocker} from "@fortawesome/free-brands-svg-icons";
 
 export const Playground = () => {
   const [networks, _setNetworks] = useState<Network[]>([]);
@@ -29,8 +33,13 @@ export const Playground = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Add a ..</DropdownMenuLabel>
-                <DropdownMenuItem>Network</DropdownMenuItem>
-                <DropdownMenuItem>Container</DropdownMenuItem>
+                <DropdownMenuItem><FontAwesomeIcon icon={faNetworkWired} />Network</DropdownMenuItem>
+                <DropdownMenuItem><FontAwesomeIcon icon={faDocker} />Container</DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Configuration</DropdownMenuLabel>
+                <DropdownMenuItem><FontAwesomeIcon icon={faWrench} />Secrets, Volumes, and Configs</DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
