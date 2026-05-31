@@ -8,7 +8,6 @@ import {
   ComboboxItem,
   ComboboxList,
   Field,
-  Input,
   Label,
   Tooltip,
   TooltipContent,
@@ -16,6 +15,7 @@ import {
 } from '@shadcn/components/ui';
 
 import type { Network } from '@/types';
+import { InputWithValidation } from "@/components";
 
 interface NetworkFormProps {
   value: Partial<Network>;
@@ -30,15 +30,20 @@ const driverOpts = [
 ];
 
 export const NetworkForm = ({ value, onChange }: NetworkFormProps) => {
+  const validateNotEmpty = (val: string): boolean => {
+    return val.length > 0;
+  }
+  
   return (
     <div className="grid flex-1 auto-rows-min gap-6 px-4">
       <div className="grid gap-3">
         <Label htmlFor="network-name" className="gap-1">Name<span className="text-destructive">*</span></Label>
-        <Input
+        <InputWithValidation
           id="network-name"
           value={value.name ?? ''}
           onChange={e => onChange({ ...value, name: e.target.value })}
           required
+          validate={validateNotEmpty}
         />
       </div>
       <div className="grid gap-3">

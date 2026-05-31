@@ -1,10 +1,7 @@
-import {
-  Input,
-  Label,
-} from '@shadcn/components/ui';
+import { Label } from '@shadcn/components/ui';
 
 import type { Container } from '@/types';
-import { PillInput } from "@/components";
+import { InputWithValidation, PillInput } from "@/components";
 
 interface ContainerFormProps {
   value: Partial<Container>;
@@ -22,25 +19,31 @@ export const ContainerForm = ({ value, onChange }: ContainerFormProps) => {
     return parts.length === 2 && parts[0].trim().length > 0 && parts[1].trim().length > 0;
   };
   
+  const validateNotEmpty = (val: string): boolean => {
+    return val.length > 0;
+  }
+  
   return (
     <div>
       <div className="grid flex-1 auto-rows-min gap-6 px-4">
         <div className="grid gap-3">
           <Label htmlFor="container-name" className="gap-1">Name<span className="text-destructive">*</span></Label>
-          <Input
+          <InputWithValidation
             id="container-name"
             value={value.name ?? ''}
             onChange={e => onChange({ ...value, name: e.target.value })}
             required
+            validate={validateNotEmpty}
           />
         </div>
         <div className="grid gap-3">
           <Label htmlFor="container-image" className="gap-1">Image<span className="text-destructive">*</span></Label>
-          <Input
+          <InputWithValidation
             id="container-image"
             value={value.image ?? ''}
             onChange={e => onChange({ ...value, image: e.target.value })}
             required
+            validate={validateNotEmpty}
           />
         </div>
         <div className="grid gap-3">
