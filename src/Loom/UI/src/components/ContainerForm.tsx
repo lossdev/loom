@@ -6,9 +6,11 @@ import { InputWithValidation, PillInput } from "@/components";
 interface ContainerFormProps {
   value: Partial<Container>;
   onChange: (updated: Partial<Container>) => void;
+  takenNames: string[];
+  onValidityChange: (valid: boolean) => void;
 }
 
-export const ContainerForm = ({ value, onChange }: ContainerFormProps) => {
+export const ContainerForm = ({ value, onChange, takenNames, onValidityChange }: ContainerFormProps) => {
   const validatePort = (val: string): boolean => {
     const n = Number(val.trim());
     return Number.isInteger(n) && n > 0 && n <= 65535;
@@ -19,9 +21,8 @@ export const ContainerForm = ({ value, onChange }: ContainerFormProps) => {
     return parts.length === 2 && parts[0].trim().length > 0 && parts[1].trim().length > 0;
   };
   
-  const validateNotEmpty = (val: string): boolean => {
-    return val.length > 0;
-  }
+  const validateName = (val: string): boolean =>
+    val.length > 0 && !takenNames.includes(val);
   
   return (
     <div>
@@ -31,9 +32,13 @@ export const ContainerForm = ({ value, onChange }: ContainerFormProps) => {
           <InputWithValidation
             id="container-name"
             value={value.name ?? ''}
-            onChange={e => onChange({ ...value, name: e.target.value })}
+            onChange={e => {
+              const updated = { ...value, name: e.target.value };
+              onChange(updated);
+              onValidityChange(validateName(e.target.value));
+            }}
             required
-            validate={validateNotEmpty}
+            validate={validateName}
           />
         </div>
         <div className="grid gap-3">
@@ -41,9 +46,13 @@ export const ContainerForm = ({ value, onChange }: ContainerFormProps) => {
           <InputWithValidation
             id="container-image"
             value={value.image ?? ''}
-            onChange={e => onChange({ ...value, image: e.target.value })}
+            onChange={e => {
+              const updated = { ...value, image: e.target.value };
+              onChange(updated);
+              onValidityChange(validateName(e.target.value));
+            }}
             required
-            validate={validateNotEmpty}
+            validate={validateName}
           />
         </div>
         <div className="grid gap-3">

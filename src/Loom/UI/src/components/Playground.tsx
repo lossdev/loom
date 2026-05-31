@@ -11,30 +11,21 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle
+  DropdownMenuTrigger
 } from "@shadcn/components/ui";
-import { 
-  ContainerForm,
+import type {
+  AddTarget,
+  Compose,
+  Container,
+  Network
+} from "@/types";
+import {
+  ComposeSheet,
   ContainerNode,
-  NetworkForm,
   NetworkNode
 } from "@/components";
-import type { Compose, Container, Network } from "@/types";
-
 
 export const Playground = () => {
-  type AddTarget =
-    | { type: 'network' }
-    | { type: 'container' }
-    | { type: 'networkContainer'; networkId: string };
-  
   const [compose, setCompose] = useState<Compose>({});
   const [draftNetwork, setDraftNetwork] = useState<Partial<Network>>({});
   const [draftContainer, setDraftContainer] = useState<Partial<Container>>({});
@@ -62,6 +53,31 @@ export const Playground = () => {
       networks: prev.networks?.map(n =>
         n.id === networkId
           ? { ...n, containers: [...n.containers, container] }
+          : n
+      ),
+    }));
+  };
+  
+  const updateContainer = (container: Container) => {
+    setCompose(prev => ({
+      ...prev,
+      containers: prev.containers?.map(c => c.id === container.id ? container : c),
+    }))
+  }
+
+  const updateNetwork = (network: Network) => {
+    setCompose(prev => ({
+      ...prev,
+      networks: prev.networks?.map(n => n.id === network.id ? network : n),
+    }));
+  };
+
+  const updateNetworkContainer = (networkId: string, container: Container) => {
+    setCompose(prev => ({
+      ...prev,
+      networks: prev.networks?.map(n =>
+        n.id === networkId
+          ? { ...n, containers: n.containers.map(c => c.id === container.id ? container : c) }
           : n
       ),
     }));
@@ -137,21 +153,25 @@ export const Playground = () => {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex justify-center content-center items-center h-full w-full">
-        <div className="flex flex-row h-90pct w-90pct dark:bg-playground-dark rounded-lg border-3 border-solid shadow-xl">
-          {
-            isEmpty ? (
+      <div className="flex justify-center content-center items-center h-full w-full overflow-hidden">
+        <div className="h-90pct w-90pct dark:bg-playground-dark rounded-lg border-3 border-solid shadow-xl overflow-auto">
+          {isEmpty ? (
             <div className="flex flex-row-reverse w-full h-10 mr-10 mt-10 animate-bounce-delayed">
               <img alt="Decorative arrow" src="/swoop-arrow.svg" className="ml-6 h-12" aria-hidden="true" />
               <span className="text-text-dark logo-font text-3xl translate-y-2">Add something to begin</span>
             </div>
           ) : (
-            <div className="flex flex-col gap-4 p-4">
+            <div className="flex flex-row flex-wrap items-start content-start gap-4 p-4">
               {compose.containers?.map(container => (
                 <ContainerNode
                   key={container.id}
                   container={container}
                   onRemove={removeContainer}
+                  onClick={container => {
+                    setAddTarget({ type: 'container-edit', container });
+                    setDraftContainer(container);
+                    setSheetOpen(true);
+                  }}
                 />
               ))}
               {compose.networks?.map((network, index) => (
@@ -164,12 +184,22 @@ export const Playground = () => {
                     setAddTarget({ type: 'networkContainer', networkId: network.id });
                     setSheetOpen(true);
                   }}
+                  onClick={network => {
+                    setAddTarget({ type: 'network-edit', network });
+                    setDraftNetwork(network),
+                    setSheetOpen(true);
+                  }}
                 >
                   {network.containers.map(container => (
                     <ContainerNode
                       key={container.id}
                       container={container}
                       onRemove={id => removeNetworkContainer(network.id, id)}
+                      onClick={container => {
+                        setAddTarget({ type: 'networkContainer-edit', networkId: network.id, container });
+                        setDraftContainer(container);
+                        setSheetOpen(true);
+                      }}
                     />
                   ))}
                 </NetworkNode>
@@ -178,64 +208,26 @@ export const Playground = () => {
           )}
         </div>
       </div>
-      <Sheet open={sheetOpen} onOpenChange={open => {
-        setSheetOpen(open);
-        if (!open) {
-          setDraftNetwork({});
-          setDraftContainer({});
-        }
-      }}>
-        <SheetContent>
-          <form onSubmit={e => {
-            e.preventDefault();
-            if (addTarget?.type === 'network') {
-              addNetwork({
-                id: crypto.randomUUID(),
-                containers: [],
-                ...draftNetwork,
-              } as Network);
-            }
-            if (addTarget?.type === 'container') {
-              addContainer({
-                id: crypto.randomUUID(),
-                ...draftContainer,
-              } as Container);
-            }
-            if (addTarget?.type === 'networkContainer') {
-              addNetworkContainer(addTarget.networkId, {
-                id: crypto.randomUUID(),
-                ...draftContainer,
-              } as Container);
-            }
-            setDraftNetwork({});
-            setDraftContainer({});
-            setSheetOpen(false);
-          }}>
-            <SheetHeader>
-              <SheetTitle>
-                {addTarget?.type === 'network' && 'Add Network'}
-                {addTarget?.type === 'container' && 'Add Container'}
-                {addTarget?.type === 'networkContainer' && 'Add Container to Network'}
-              </SheetTitle>
-              <SheetDescription>
-                Add a new&nbsp;
-                {addTarget?.type === 'network' ? 'Network' : 'Container'}
-                &nbsp;configuration below.
-              </SheetDescription>
-            </SheetHeader>
-            {addTarget?.type === 'network' ?
-              <NetworkForm value={draftNetwork} onChange={setDraftNetwork} />
-              :
-              <ContainerForm value={draftContainer} onChange={setDraftContainer} />}
-            <SheetFooter>
-              <Button type="submit">Save changes</Button>
-              <SheetClose asChild>
-                <Button variant="outline" type="button">Close</Button>
-              </SheetClose>
-            </SheetFooter>
-          </form>
-        </SheetContent>
-      </Sheet>
+      <ComposeSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        addTarget={addTarget}
+        draftNetwork={draftNetwork}
+        draftContainer={draftContainer}
+        onDraftNetworkChange={setDraftNetwork}
+        onDraftContainerChange={setDraftContainer}
+        onAddNetwork={addNetwork}
+        onAddContainer={addContainer}
+        onAddNetworkContainer={addNetworkContainer}
+        onUpdateNetwork={updateNetwork}
+        onUpdateContainer={updateContainer}
+        onUpdateNetworkContainer={updateNetworkContainer}
+        takenNetworkNames={compose.networks?.map(n => n.name) ?? []}
+        takenContainerNames={[
+          ...(compose.containers?.map(c => c.name) ?? []),
+          ...(compose.networks?.flatMap(n => n.containers.map(c => c.name)) ?? [])
+        ]}
+      />
     </React.Fragment>
   );
 }

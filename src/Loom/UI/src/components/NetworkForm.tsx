@@ -20,6 +20,8 @@ import { InputWithValidation } from "@/components";
 interface NetworkFormProps {
   value: Partial<Network>;
   onChange: (updated: Partial<Network>) => void;
+  takenNames: string[];
+  onValidityChange: (valid: boolean) => void;
 }
 
 const driverOpts = [
@@ -29,10 +31,9 @@ const driverOpts = [
   'none'
 ];
 
-export const NetworkForm = ({ value, onChange }: NetworkFormProps) => {
-  const validateNotEmpty = (val: string): boolean => {
-    return val.length > 0;
-  }
+export const NetworkForm = ({ value, onChange, takenNames, onValidityChange }: NetworkFormProps) => {
+  const validateName = (val: string): boolean =>
+    val.length > 0 && !takenNames.includes(val);
   
   return (
     <div className="grid flex-1 auto-rows-min gap-6 px-4">
@@ -41,16 +42,24 @@ export const NetworkForm = ({ value, onChange }: NetworkFormProps) => {
         <InputWithValidation
           id="network-name"
           value={value.name ?? ''}
-          onChange={e => onChange({ ...value, name: e.target.value })}
+          onChange={e => {
+            const updated = { ...value, name: e.target.value };
+            onChange(updated);
+            onValidityChange(validateName(e.target.value));
+          }}
           required
-          validate={validateNotEmpty}
+          validate={validateName}
         />
       </div>
       <div className="grid gap-3">
         <Label htmlFor="network-driver" className="gap-1">Driver<span className="text-destructive">*</span></Label>
-        <Combobox items={driverOpts}>
+        <Combobox
+          items={driverOpts}
+          value={value.driver ?? 'bridge'}
+          onValueChange={driver => onChange({ ...value, driver: driver as Network['driver'] })}
+        >
           <ComboboxInput placeholder="Driver type ..." />
-          <ComboboxContent>
+          <ComboboxContent className="z-[200]">
             <ComboboxEmpty>No items found.</ComboboxEmpty>
             <ComboboxList>
               {(item) => (
@@ -63,7 +72,12 @@ export const NetworkForm = ({ value, onChange }: NetworkFormProps) => {
         </Combobox>
       </div>
       <div className="flex flex-row justify-center items-center">
-        <Checkbox id="attachable-checkbox" name="attachable-checkbox" />
+        <Checkbox
+          id="attachable-checkbox"
+          name="attachable-checkbox"
+          checked={value.attachable ?? false}
+          onCheckedChange={checked => onChange({ ...value, attachable: checked === true })}
+        />
         <Field orientation="horizontal">
           <Label htmlFor="attachable-checkbox" className="ml-2">Attachable</Label>
           <Tooltip>
