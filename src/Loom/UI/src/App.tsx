@@ -1,14 +1,15 @@
-import { TopBar } from './components/TopBar.tsx'
-import { RootBackground } from "./components/RootBackground.tsx";
-import {Playground} from "@/components/Playground.tsx";
+import { TopBar, RootBackground, Playground } from '@/components';
+import { TooltipProvider } from "@shadcn/components/ui";
 
 export default function App() {
   return (
     <div>
-      <RootBackground >
-        <TopBar />
-        <Playground />
-      </RootBackground>
+      <TooltipProvider>
+        <RootBackground >
+          <TopBar />
+          <Playground />
+        </RootBackground>
+      </TooltipProvider>
     </div>
   )
 }
