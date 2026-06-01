@@ -1,18 +1,5 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faNetworkWired, faTools } from "@fortawesome/free-solid-svg-icons";
-import { faDocker} from "@fortawesome/free-brands-svg-icons";
 
-import {
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@shadcn/components/ui";
 import type {
   AddTarget,
   Compose,
@@ -20,6 +7,7 @@ import type {
   Network
 } from "@/types";
 import {
+  ButtonBar,
   ComposeSheet,
   ContainerNode,
   NetworkNode
@@ -112,47 +100,14 @@ export const Playground = () => {
 
   return (
     <React.Fragment>
-      <div className="flex flex-row-reverse items-center">
-        <div className="mr-16">
-          <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline"
-                      size="icon-lg"
-                      className="rounded-full dark:bg-button-bg-dark dark:hover:bg-button-bg-dark-hover dark:text-text-dark">
-                <FontAwesomeIcon icon={faPlus} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                <span><DropdownMenuLabel>Add a ..</DropdownMenuLabel></span>
-                <span><DropdownMenuItem
-                  onSelect={e => {
-                  e.preventDefault();
-                  setDropdownOpen(false);
-                  setAddTarget({ type: 'network' });
-                  setSheetOpen(true);
-                  }}
-                >
-                  <FontAwesomeIcon icon={faNetworkWired} />Network</DropdownMenuItem></span>
-                <span><DropdownMenuItem
-                  onSelect={e => {
-                    e.preventDefault();
-                    setDropdownOpen(false);
-                    setAddTarget({ type: 'container' });
-                    setSheetOpen(true);
-                  }}
-                >
-                  <FontAwesomeIcon icon={faDocker} />Container</DropdownMenuItem></span>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <span><DropdownMenuLabel>Configuration</DropdownMenuLabel></span>
-                <span><DropdownMenuItem><FontAwesomeIcon icon={faTools} />Secrets, Volumes, and Configs</DropdownMenuItem></span>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <ButtonBar
+        compose={compose}
+        isEmpty={isEmpty}
+        isDropdownOpen={dropdownOpen}
+        setDropdownOpen={setDropdownOpen}
+        setAddTarget={setAddTarget}
+        setSheetOpen={setSheetOpen}
+      />
       <div className="flex justify-center content-center items-center h-full w-full overflow-hidden">
         <div className="h-90pct w-90pct dark:bg-playground-dark rounded-lg border-3 border-solid shadow-xl overflow-auto">
           {isEmpty ? (

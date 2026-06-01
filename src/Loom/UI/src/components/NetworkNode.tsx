@@ -61,7 +61,6 @@ export const NetworkNode = ({ network, index, onRemove, onAddContainer, onClick,
       <CardContent className="flex flex-row flex-wrap gap-2 p-0">
         {children}
       </CardContent>
-      
     </Card>
   );
 };

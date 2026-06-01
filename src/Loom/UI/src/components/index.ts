@@ -1,3 +1,4 @@
+export * from './ButtonBar';
 export * from './ComposeSheet';
 export * from './ContainerForm';
 export * from './ContainerNode';

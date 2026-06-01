@@ -4,4 +4,11 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" />
+      <PackageReference Include="YamlDotNet" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Core\Core.csproj" />
+    </ItemGroup>
 </Project>
