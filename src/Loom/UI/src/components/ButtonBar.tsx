@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faNetworkWired, faPlus, faTools, faWandMagicSparkles, faCopy, faCheck, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import { faDocker } from "@fortawesome/free-brands-svg-icons";
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import yaml from 'react-syntax-highlighter/dist/esm/languages/hljs/yaml';
+import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+
 import {
   Button,
   Dialog,
@@ -17,10 +24,9 @@ import {
   DropdownMenuTrigger,
   Spinner
 } from "@shadcn/components/ui";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faNetworkWired, faPlus, faTools, faWandMagicSparkles, faCopy, faCheck, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
-import { faDocker } from "@fortawesome/free-brands-svg-icons";
 import type { AddTarget, Compose } from "@/types";
+
+SyntaxHighlighter.registerLanguage('yaml', yaml);
 
 interface ButtonBarProps {
   compose: Compose;
@@ -65,7 +71,7 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
   return (
     <React.Fragment>
       <div className="flex flex-row-reverse items-center">
-        <div className="mr-16">
+        <div className="mr-8 sm:mr-10 md:mr-16">
           <DropdownMenu open={isDropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline"
@@ -117,7 +123,7 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
                 <FontAwesomeIcon icon={faWandMagicSparkles} className="ml-2" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="md:max-w-sm max-h-3/5 max-w-1/3">
+            <DialogContent className="max-h-3/5 md:max-w-md max-w-4/5">
               <DialogHeader>
                 <DialogTitle className="mb-4">Your docker-compose.yml</DialogTitle>
                 <DialogDescription>
@@ -131,12 +137,16 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
                 >
                   { composeFile !== "" && <FontAwesomeIcon icon={copied ? faCheck : faCopy} /> }
                 </button>
-                <pre className="pr-6">{
-                  composeFile !== ""
-                    ? composeFile : 
-                    <div className="flex flex-row"><Spinner className="mr-4" />Loading...</div> 
-                  }
-                </pre>
+                { composeFile !== "" ?
+                  <SyntaxHighlighter
+                    language="yaml"
+                    style={atomOneDark}
+                    customStyle={{ background: 'transparent', margin: 0, padding: 0 }}
+                  >
+                    {composeFile}
+                  </SyntaxHighlighter> :
+                  <div className="flex flex-row"><Spinner className="mr-4" />Loading...</div>
+                }
               </div>
               <DialogFooter>
                 <Button type="button" onClick={handleSave}><FontAwesomeIcon icon={faFloppyDisk} className="mr-1"/>Save</Button>
