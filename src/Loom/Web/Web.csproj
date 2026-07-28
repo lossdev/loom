@@ -5,7 +5,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="Docker.DotNet" />
       <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" />
+      <PackageReference Include="Serilog" />
+      <PackageReference Include="Serilog.Extensions.Hosting" />
+      <PackageReference Include="Serilog.Settings.Configuration" />
+      <PackageReference Include="Serilog.Sinks.Spectre" />
       <PackageReference Include="YamlDotNet" />
     </ItemGroup>
     <ItemGroup>

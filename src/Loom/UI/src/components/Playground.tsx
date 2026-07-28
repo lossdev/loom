@@ -13,6 +13,7 @@ import {
   NetworkNode
 } from "@/components";
 
+// TODO: Verify light theme colors
 export const Playground = () => {
   const [compose, setCompose] = useState<Compose>({});
   const [draftNetwork, setDraftNetwork] = useState<Partial<Network>>({});
@@ -141,7 +142,7 @@ export const Playground = () => {
                   }}
                   onClick={network => {
                     setAddTarget({ type: 'network-edit', network });
-                    setDraftNetwork(network),
+                    setDraftNetwork(network);
                     setSheetOpen(true);
                   }}
                 >

@@ -3,7 +3,7 @@ namespace Loom.Web.Api;
 using Loom.Core.Models;
 using Loom.Core.Serialization;
 
-public static class ComposeHandler
+public static class GetComposeHandler
 {
     public static IResult Handle(Compose compose)
     {

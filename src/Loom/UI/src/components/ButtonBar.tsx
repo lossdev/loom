@@ -64,6 +64,7 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
       body: JSON.stringify(compose),
     });
 
+    // TODO: return error text in a friendly way
     if (!response.ok) throw new Error(`Failed to generate compose: ${response.status}`);
     setComposeFile(await response.text());
   };
