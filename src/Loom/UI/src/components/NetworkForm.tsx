@@ -8,6 +8,7 @@ import {
   ComboboxItem,
   ComboboxList,
   Field,
+  FieldError,
   Label,
   Tooltip,
   TooltipContent,
@@ -22,6 +23,7 @@ interface NetworkFormProps {
   onChange: (updated: Partial<Network>) => void;
   takenNames: string[];
   onValidityChange: (valid: boolean) => void;
+  error?: string;
 }
 
 const driverOpts = [
@@ -31,7 +33,7 @@ const driverOpts = [
   'none'
 ];
 
-export const NetworkForm = ({ value, onChange, takenNames, onValidityChange }: NetworkFormProps) => {
+export const NetworkForm = ({ value, onChange, takenNames, onValidityChange, error }: NetworkFormProps) => {
   const validateName = (val: string): boolean =>
     val.length > 0 && !takenNames.includes(val);
   
@@ -50,6 +52,7 @@ export const NetworkForm = ({ value, onChange, takenNames, onValidityChange }: N
           required
           validate={validateName}
         />
+        <FieldError>{error}</FieldError>
       </div>
       <div className="grid gap-3">
         <Label htmlFor="network-driver" className="gap-1">Driver<span className="text-destructive">*</span></Label>

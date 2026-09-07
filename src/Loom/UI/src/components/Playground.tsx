@@ -13,6 +13,11 @@ import {
   NetworkNode
 } from "@/components";
 
+const getContainerNames = (compose: Compose): string[] => [
+  ...(compose.containers?.map(c => c.name) ?? []),
+  ...(compose.networks?.flatMap(n => n.containers.map(c => c.name)) ?? [])
+];
+
 // TODO: Verify light theme colors
 export const Playground = () => {
   const [compose, setCompose] = useState<Compose>({});
@@ -22,21 +27,32 @@ export const Playground = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const addNetwork = (network: Network) => {
+  const addNetwork = (network: Network): boolean => {
+    if (compose.networks?.some(n => n.name === network.name)) {
+      return false;
+    }
     setCompose(prev => ({
       ...prev,
       networks: [...(prev.networks ?? []), network],
     }));
+    return true;
   };
 
-  const addContainer = (container: Container) => {
+  const addContainer = (container: Container): boolean => {
+    if (getContainerNames(compose).includes(container.name)) {
+      return false;
+    }
     setCompose(prev => ({
       ...prev,
       containers: [...(prev.containers ?? []), container],
     }));
+    return true;
   };
 
-  const addNetworkContainer = (networkId: string, container: Container) => {
+  const addNetworkContainer = (networkId: string, container: Container): boolean => {
+    if (getContainerNames(compose).includes(container.name)) {
+      return false;
+    }
     setCompose(prev => ({
       ...prev,
       networks: prev.networks?.map(n =>
@@ -45,6 +61,7 @@ export const Playground = () => {
           : n
       ),
     }));
+    return true;
   };
   
   const updateContainer = (container: Container) => {
@@ -179,10 +196,7 @@ export const Playground = () => {
         onUpdateContainer={updateContainer}
         onUpdateNetworkContainer={updateNetworkContainer}
         takenNetworkNames={compose.networks?.map(n => n.name) ?? []}
-        takenContainerNames={[
-          ...(compose.containers?.map(c => c.name) ?? []),
-          ...(compose.networks?.flatMap(n => n.containers.map(c => c.name)) ?? [])
-        ]}
+        takenContainerNames={getContainerNames(compose)}
       />
     </React.Fragment>
   );

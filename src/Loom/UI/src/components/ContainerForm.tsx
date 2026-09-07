@@ -1,4 +1,4 @@
-import { Label } from '@shadcn/components/ui';
+import { FieldError, Label } from '@shadcn/components/ui';
 
 import type { Container } from '@/types';
 import { InputWithValidation, PillInput } from "@/components";
@@ -8,9 +8,10 @@ interface ContainerFormProps {
   onChange: (updated: Partial<Container>) => void;
   takenNames: string[];
   onValidityChange: (valid: boolean) => void;
+  error?: string;
 }
 
-export const ContainerForm = ({ value, onChange, takenNames, onValidityChange }: ContainerFormProps) => {
+export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, error }: ContainerFormProps) => {
   const validatePort = (val: string): boolean => {
     const n = Number(val.trim());
     return Number.isInteger(n) && n > 0 && n <= 65535;
@@ -40,6 +41,7 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange }:
             required
             validate={validateName}
           />
+          <FieldError>{error}</FieldError>
         </div>
         <div className="grid gap-3">
           <Label htmlFor="container-image" className="gap-1">Image<span className="text-destructive">*</span></Label>

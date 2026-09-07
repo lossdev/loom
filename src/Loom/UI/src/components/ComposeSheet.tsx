@@ -20,9 +20,9 @@ interface ComposeSheetProps {
   draftContainer: Partial<Container>;
   onDraftNetworkChange: (network: Partial<Network>) => void;
   onDraftContainerChange: (container: Partial<Container>) => void;
-  onAddNetwork: (network: Network) => void;
-  onAddContainer: (container: Container) => void;
-  onAddNetworkContainer: (networkId: string, container: Container) => void;
+  onAddNetwork: (network: Network) => boolean;
+  onAddContainer: (container: Container) => boolean;
+  onAddNetworkContainer: (networkId: string, container: Container) => boolean;
   onUpdateNetwork: (network: Network) => void;
   onUpdateContainer: (container: Container) => void;
   onUpdateNetworkContainer: (networkId: string, container: Container) => void;
@@ -54,29 +54,48 @@ export const ComposeSheet = ({
       onDraftNetworkChange({});
       onDraftContainerChange({});
       setFormValid(false);
+      setDuplicateNameError(undefined);
     }
   };
-  
+
+  const handleDraftNetworkChange = (network: Partial<Network>) => {
+    setDuplicateNameError(undefined);
+    onDraftNetworkChange(network);
+  };
+
+  const handleDraftContainerChange = (container: Partial<Container>) => {
+    setDuplicateNameError(undefined);
+    onDraftContainerChange(container);
+  };
+
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    let added = true;
     if (addTarget?.type === 'network') {
-      onAddNetwork({ id: crypto.randomUUID(), containers: [], driver: draftNetwork.driver || 'bridge', ...draftNetwork } as Network);
+      added = onAddNetwork({ id: crypto.randomUUID(), containers: [], driver: draftNetwork.driver || 'bridge', ...draftNetwork } as Network);
     }
     if (addTarget?.type === 'network-edit') {
       onUpdateNetwork({ ...addTarget.network, ...draftNetwork } as Network);
     }
     if (addTarget?.type === 'container') {
-      onAddContainer({ id: crypto.randomUUID(), ...draftContainer } as Container);
+      added = onAddContainer({ id: crypto.randomUUID(), ...draftContainer } as Container);
     }
     if (addTarget?.type === 'container-edit') {
       onUpdateContainer({ ...addTarget.container, ...draftContainer } as Container);
     }
     if (addTarget?.type === 'networkContainer') {
-      onAddNetworkContainer(addTarget.networkId, { id: crypto.randomUUID(), ...draftContainer } as Container);
+      added = onAddNetworkContainer(addTarget.networkId, { id: crypto.randomUUID(), ...draftContainer } as Container);
     }
     if (addTarget?.type === 'networkContainer-edit') {
       onUpdateNetworkContainer(addTarget.networkId, { ...addTarget.container, ...draftContainer } as Container);
     }
+
+    if (!added) {
+      const name = isNetwork ? draftNetwork.name : draftContainer.name;
+      setDuplicateNameError(`A ${isNetwork ? 'network' : 'container'} named "${name}" already exists.`);
+      return;
+    }
+
     onDraftNetworkChange({});
     onDraftContainerChange({});
     onOpenChange(false);
@@ -85,9 +104,11 @@ export const ComposeSheet = ({
   const isEdit = addTarget?.type.includes('edit');
   const isNetwork = addTarget?.type === 'network' || addTarget?.type === 'network-edit';
   const [formValid, setFormValid] = useState(false);
+  const [duplicateNameError, setDuplicateNameError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setFormValid(addTarget?.type.includes('edit') ?? false);
+    setDuplicateNameError(undefined);
   }, [addTarget]);
 
   const title = () => {
@@ -113,8 +134,8 @@ export const ComposeSheet = ({
             </SheetDescription>
           </SheetHeader>
           {isNetwork
-            ? <NetworkForm value={draftNetwork} onChange={onDraftNetworkChange} takenNames={takenNetworkNames} onValidityChange={setFormValid} />
-            : <ContainerForm value={draftContainer} onChange={onDraftContainerChange} takenNames={takenContainerNames} onValidityChange={setFormValid} />}
+            ? <NetworkForm value={draftNetwork} onChange={handleDraftNetworkChange} takenNames={takenNetworkNames} onValidityChange={setFormValid} error={duplicateNameError} />
+            : <ContainerForm value={draftContainer} onChange={handleDraftContainerChange} takenNames={takenContainerNames} onValidityChange={setFormValid} error={duplicateNameError} />}
           <SheetFooter>
             <Button type="submit" disabled={!formValid}>{isEdit ? 'Save changes' : 'Add'}</Button>
             <SheetClose asChild>

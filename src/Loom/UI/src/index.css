@@ -13,11 +13,24 @@
     --color-button-bg-dark-hover: #3C3685;
     --color-text-dark: #EEEDFE;
     --color-playground-dark: rgba(54, 48, 122, 0.75);
+    --color-status-green: #65FF4A;
+    --color-status-yellow: #FFF94A;
+    --color-status-red: #FF4A4A;
     --height-15pct: 15%;
     --height-85pct: 85%;
     --height-90pct: 90%;
     --width-90pct: 90%;
     --animate-bounce-delayed: bounce-delayed 3s ease-in-out infinite;
+    --animate-spin-once: spin-once 0.5s ease-in-out;
+}
+
+@keyframes spin-once {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes bounce-delayed {
