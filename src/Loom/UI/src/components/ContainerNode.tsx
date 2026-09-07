@@ -21,7 +21,7 @@ export const ContainerNode = ({ container, onRemove, onClick }: ContainerNodePro
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
           <span className="text-sm font-medium text-white/90">{container.name}</span>
-          <span className="text-xs text-white/50 mt-6">{container.image}</span>
+          <span className="text-xs text-white/50 mt-6">{container.image}{container.tag ? `:${container.tag}` : ''}</span>
           {container.ports && container.ports.length > 0 && (
             <span className="text-xs text-white/40 mt-1">
               {container.ports.map(p => `:${p}`).join(', ')}

@@ -11,7 +11,7 @@ public class DockerConnectionService
     private readonly ILogger<DockerConnectionService> _logger;
     private readonly bool _disabled;
     private DockerClient? _client;
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly SemaphoreSlim _lock = new(initialCount: 1, maxCount: 1);
 
     public DockerConnectionState State { get; private set; }
 
@@ -141,6 +141,32 @@ public class DockerConnectionService
             AvailableTags: tags);
     }
     
+    /// <summary>
+    /// Searches locally-pulled images for repo names containing the given substring.
+    /// Returns null if Docker isn't connected.
+    /// </summary>
+    public async Task<IReadOnlyList<string>?> SearchLocalImagesAsync(string query, CancellationToken ct = default)
+    {
+        if (this.State.Status != DockerConnectionStatus.Connected || this._client is null)
+            return null;
+
+        var images = await this._client.Images.ListImagesAsync(new ImagesListParameters
+        {
+            Filters = new Dictionary<string, IDictionary<string, bool>>
+            {
+                ["dangling"] = new Dictionary<string, bool> { ["false"] = true },
+                ["reference"] = new Dictionary<string, bool> { [$"*{query}*"] = true }
+            }
+        }, ct);
+
+        return images
+            .SelectMany(i => i.RepoTags ?? [])
+            .Where(t => t != "<none>:<none>")
+            .Select(t => t[..t.LastIndexOf(':')])
+            .Distinct()
+            .ToList();
+    }
+
     private void SetState(DockerConnectionState newState, DockerConnectionStatus previousStatus)
     {
         this.State = newState;

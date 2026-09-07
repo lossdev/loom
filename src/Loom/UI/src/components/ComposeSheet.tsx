@@ -106,6 +106,15 @@ export const ComposeSheet = ({
   const [formValid, setFormValid] = useState(false);
   const [duplicateNameError, setDuplicateNameError] = useState<string | undefined>(undefined);
 
+  // Editing shouldn't trip the duplicate check against the entity's own (unchanged) name.
+  const effectiveTakenNetworkNames = addTarget?.type === 'network-edit'
+    ? takenNetworkNames.filter(name => name !== addTarget.network.name)
+    : takenNetworkNames;
+
+  const effectiveTakenContainerNames = addTarget?.type === 'container-edit' || addTarget?.type === 'networkContainer-edit'
+    ? takenContainerNames.filter(name => name !== addTarget.container.name)
+    : takenContainerNames;
+
   useEffect(() => {
     setFormValid(addTarget?.type.includes('edit') ?? false);
     setDuplicateNameError(undefined);
@@ -134,8 +143,8 @@ export const ComposeSheet = ({
             </SheetDescription>
           </SheetHeader>
           {isNetwork
-            ? <NetworkForm value={draftNetwork} onChange={handleDraftNetworkChange} takenNames={takenNetworkNames} onValidityChange={setFormValid} error={duplicateNameError} />
-            : <ContainerForm value={draftContainer} onChange={handleDraftContainerChange} takenNames={takenContainerNames} onValidityChange={setFormValid} error={duplicateNameError} />}
+            ? <NetworkForm value={draftNetwork} onChange={handleDraftNetworkChange} takenNames={effectiveTakenNetworkNames} onValidityChange={setFormValid} error={duplicateNameError} />
+            : <ContainerForm value={draftContainer} onChange={handleDraftContainerChange} takenNames={effectiveTakenContainerNames} onValidityChange={setFormValid} error={duplicateNameError} />}
           <SheetFooter>
             <Button type="submit" disabled={!formValid}>{isEdit ? 'Save changes' : 'Add'}</Button>
             <SheetClose asChild>

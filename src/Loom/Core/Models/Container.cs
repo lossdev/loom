@@ -5,6 +5,7 @@ public class Container
     public required string Id { get; set; }
     public required string Name { get; set; }
     public required string Image { get; set; }
+    public string? Tag { get; set; }
     public int[]? Ports { get; set; }
     public Dictionary<string, string>? Env { get; set; }
     public Dictionary<string, string>? Annotations { get; set; }

@@ -18,6 +18,11 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSingleton<DockerConnectionService>();
         builder.Services.AddHostedService<DockerHealthCheckBackgroundService>();
+        builder.Services.AddHttpClient<DockerHubService>(client =>
+        {
+            client.BaseAddress = new Uri("https://hub.docker.com/");
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
 
         var app = builder.Build();
         

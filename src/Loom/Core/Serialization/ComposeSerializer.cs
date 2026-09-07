@@ -56,7 +56,7 @@ public static class ComposeSerializer
     {
         return new ServiceDefinition
         {
-            Image = container.Image,
+            Image = container.Tag is { Length: > 0 } ? $"{container.Image}:{container.Tag}" : container.Image,
             Ports = container.Ports is { Length: > 0 }
                 ? container.Ports.Select(p => $"{p}:{p}").ToList()
                 : null,
