@@ -1,5 +1,5 @@
 <p>
-    <img width="85%" src="loom-readme-banner.png" alt="Logo"
+    <img width="85%" src="loom-readme-banner.png" alt="Logo">
  </p>
 
  # loom
@@ -8,6 +8,11 @@
  Loom lets you visually create a deployment spec, and then generate a Docker Compose or (coming soon™️) Kubernetes Helm chart given that deployment.
  Hopefully useful for people like me that use the docker-compose or Helm chart spec often enough to need to deploy things, but not often enough to actually
  remember the syntax to do so ..
+
+ <p>
+    <img width="60%" src="loom-playground.png" alt="Playground">
+    <img width="30%" src="loom-dockercompose.png" alt="Docker Compose">
+</p>
 
  ## Usage
  Loom is a fully self-contained Aspire app, with a nodejs/React frontend and an ASPNET backend. I'd recommend opening `loom.slnx` in your preferred IDE (VisualStudio, Rider, etc), and then simply hit play on the `https` profile (hit accept on the self-signed certificate if you encounter that dialog). Or, from the command line at the top-level directory:
