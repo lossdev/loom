@@ -5,7 +5,7 @@
  # loom
 
  ## What Loom Does
- Loom lets you visually create a deployment spec, and then generate a Docker Compose or (coming soon™️) Kubernetes Helm chart given that deployment.
+ Loom lets you visually create a deployment spec and then generate a Docker Compose or (coming soon™️) Kubernetes Helm chart given that deployment.
  Hopefully useful for people like me that use the docker-compose or Helm chart spec often enough to need to deploy things, but not often enough to actually
  remember the syntax to do so ..
 
@@ -15,7 +15,7 @@
 </p>
 
  ## Usage
- Loom is a fully self-contained Aspire app, with a nodejs/React frontend and an ASPNET backend. I'd recommend opening `loom.slnx` in your preferred IDE (VisualStudio, Rider, etc), and then simply hit play on the `https` profile (hit accept on the self-signed certificate if you encounter that dialog). Or, from the command line at the top-level directory:
+ Loom is a fully self-contained Aspire app, with a nodejs/React frontend and an ASPNET backend. I'd recommend opening `loom.slnx` in your preferred IDE (VisualStudio, Rider, etc), and then simply hit play on the `http` profile. If you choose the `https` profile, you'll most likely need to hit accept on the self-signed certificate dialog. Or, from the command line at the top-level directory:
 
  ```bash
  $ dotnet run --project src/Loom/AppHost
