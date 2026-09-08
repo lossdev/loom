@@ -68,7 +68,7 @@ export const DockerConnectionState = () => {
   return(
     <React.Fragment>
       <div className="flex flex-row items-center w-full pl-12 pb-6">
-        <FontAwesomeIcon icon={faCircle} className={`pr-4 ${statusColor}`} />
+        <FontAwesomeIcon icon={faCircle} className={`pr-2 ${statusColor}`} />
         <span className="text-text-dark text-sm">Docker connection: {dockerState == 'NotFound' ? 'Not Found' : dockerState}</span>
         <FontAwesomeIcon
           key={spinCount}

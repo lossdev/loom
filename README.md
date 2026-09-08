@@ -22,3 +22,7 @@
  Loom will automatically attempt to find a local docker daemon instance at startup - this behavior is however controlled with an env variable `LOOM_LOCAL_DOCKER_DISABLED` which defaults to `false`. You can override this behavior by setting this env var to `true`.
 
  This allows loom to flatten responses from both your local docker instance's registry and Dockerhub's registry, with `Local` images preferred over Dockerhub ones, and `Official` images preferred over non-official ones from Dockerhub - i.e `Local > Dockerhub Official > Dockerhub`. You'll see this behavior in the `Image` and `Tag` fields on adding or modifying Containers in the UI, as well as see the current local Docker connection status at the bottom of the playground.
+
+ ## TODOs
+ * Secrets, Volumes, and Config (currently a noop)
+ * Helm Charts
