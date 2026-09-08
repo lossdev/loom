@@ -10,7 +10,7 @@
  remember the syntax to do so ..
 
  ## Usage
- Loom is a fully self-contained Aspire app, with a nodejs frontend and an ASPNET backend. I'd recommend opening `loom.slnx` in your preferred IDE (VisualStudio, Rider, etc), and then simply hit play. Or, from the command line at the top-level directory:
+ Loom is a fully self-contained Aspire app, with a nodejs/React frontend and an ASPNET backend. I'd recommend opening `loom.slnx` in your preferred IDE (VisualStudio, Rider, etc), and then simply hit play on the `https` profile (hit accept on the self-signed certificate if you encounter that dialog). Or, from the command line at the top-level directory:
 
  ```bash
  $ dotnet run --project src/Loom/AppHost
