@@ -134,7 +134,7 @@ export const ComposeSheet = ({
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex h-full flex-col overflow-hidden">
           <SheetHeader>
             <SheetTitle>{title()}</SheetTitle>
             <SheetDescription>
@@ -142,9 +142,11 @@ export const ComposeSheet = ({
               {isNetwork ? 'Network' : 'Container'}&nbsp;configuration below.
             </SheetDescription>
           </SheetHeader>
-          {isNetwork
-            ? <NetworkForm value={draftNetwork} onChange={handleDraftNetworkChange} takenNames={effectiveTakenNetworkNames} onValidityChange={setFormValid} error={duplicateNameError} />
-            : <ContainerForm value={draftContainer} onChange={handleDraftContainerChange} takenNames={effectiveTakenContainerNames} onValidityChange={setFormValid} error={duplicateNameError} />}
+          <div className="flex-1 overflow-y-auto">
+            {isNetwork
+              ? <NetworkForm value={draftNetwork} onChange={handleDraftNetworkChange} takenNames={effectiveTakenNetworkNames} onValidityChange={setFormValid} error={duplicateNameError} />
+              : <ContainerForm value={draftContainer} onChange={handleDraftContainerChange} takenNames={effectiveTakenContainerNames} onValidityChange={setFormValid} error={duplicateNameError} />}
+          </div>
           <SheetFooter>
             <Button type="submit" disabled={!formValid}>{isEdit ? 'Save changes' : 'Add'}</Button>
             <SheetClose asChild>
