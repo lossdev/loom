@@ -7,6 +7,11 @@
     <ItemGroup>
       <PackageReference Include="Docker.DotNet" />
       <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" />
+      <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+      <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
       <PackageReference Include="Serilog" />
       <PackageReference Include="Serilog.Extensions.Hosting" />
       <PackageReference Include="Serilog.Settings.Configuration" />
