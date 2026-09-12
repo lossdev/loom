@@ -22,10 +22,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Spinner
+  Spinner,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
 } from "@shadcn/components/ui";
 import type { AddTarget, Compose } from "@/types";
-import { describeRequestError, describeResponseError } from "@/lib";
+import { copyToClipboard, describeRequestError, describeResponseError } from "@/lib";
 
 SyntaxHighlighter.registerLanguage('yaml', yaml);
 
@@ -42,9 +45,18 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
   const [composeFile, setComposeFile] = useState<string>("");
   const [composeError, setComposeError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
+  const [copyTipOpen, setCopyTipOpen] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(composeFile);
+  const handleCopy = async () => {
+    const failure = await copyToClipboard(composeFile);
+    setCopyError(failure);
+    if (failure !== null) {
+      setCopied(false);
+      return;
+    }
+    // Only the success tick is transient; a failure stays put until the next
+    // attempt so there is time to read it.
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -124,7 +136,10 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
         { !isEmpty &&
           <Dialog onOpenChange={(open) => {
             if (open) { setComposeError(null); generateCompose(compose); }
-            if (!open) { setCopied(false); setComposeFile(""); setComposeError(null); }
+            if (!open) {
+              setCopied(false); setCopyError(null); setCopyTipOpen(false);
+              setComposeFile(""); setComposeError(null);
+            }
           }}>
             <DialogTrigger asChild>
               <Button variant="outline"
@@ -142,12 +157,26 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
                 </DialogDescription>
               </DialogHeader>
               <div className="relative mb-2 p-2 bg-input rounded-md overflow-y-auto max-h-72 min-h-16 border-3 border-accent">
-                <button
-                  onClick={handleCopy}
-                  className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  { composeFile !== "" && <FontAwesomeIcon icon={copied ? faCheck : faCopy} /> }
-                </button>
+                { composeFile !== "" &&
+                  <Tooltip open={copyError !== null || copyTipOpen} onOpenChange={setCopyTipOpen}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleCopy}
+                        aria-label="Copy to clipboard"
+                        className={`absolute top-2 right-2 transition-colors ${
+                          copyError !== null ? 'text-destructive' : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <FontAwesomeIcon
+                          icon={copyError !== null ? faTriangleExclamation : copied ? faCheck : faCopy}
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{copyError ?? 'Copy to clipboard'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                }
                 { composeError !== null ?
                   <div className="flex flex-row items-start text-destructive">
                     <FontAwesomeIcon icon={faTriangleExclamation} className="mr-3 mt-1" />
