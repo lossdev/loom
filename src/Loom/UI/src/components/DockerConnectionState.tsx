@@ -4,7 +4,7 @@ import { faArrowRotateLeft, faCircle } from "@fortawesome/free-solid-svg-icons";
 
 export const DockerConnectionState = () => {
 
-  // @ts-ignore
+  // @ts-expect-error a const enum is not erasable syntax, which this project enforces
   const enum connectionState {
     Disabled = 'Disabled',
     NotFound = 'NotFound',
@@ -45,7 +45,7 @@ export const DockerConnectionState = () => {
     updateDockerConnectionState();
   };
 
-  const updateStatusColor = (status: any) => {
+  const updateStatusColor = (status: string) => {
     switch(status) {
       case 'Connected':
         setStatusColor('text-status-green');
@@ -59,10 +59,13 @@ export const DockerConnectionState = () => {
     }
   }
 
+  // Deliberately runs once on mount; the fetch helper is redefined every render,
+  // so listing it as a dependency would re-run this on every render.
   useEffect(() => {
     (async () => {
       await getDockerConnectionState();
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   return(

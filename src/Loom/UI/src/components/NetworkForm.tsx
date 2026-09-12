@@ -74,24 +74,45 @@ export const NetworkForm = ({ value, onChange, takenNames, onValidityChange, err
           </ComboboxContent>
         </Combobox>
       </div>
-      <div className="flex flex-row justify-center items-center">
-        <Checkbox
-          id="attachable-checkbox"
-          name="attachable-checkbox"
-          checked={value.attachable ?? false}
-          onCheckedChange={checked => onChange({ ...value, attachable: checked === true })}
-        />
-        <Field orientation="horizontal">
-          <Label htmlFor="attachable-checkbox" className="ml-2">Attachable</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="xs">?</Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>This network can be attached to after creation by standalone containers.</p>
-            </TooltipContent>
-          </Tooltip>
-        </Field>
+      <div className="flex flex-row flex-wrap gap-6">
+        <div className="flex flex-row justify-center items-center">
+          <Checkbox
+            id="attachable-checkbox"
+            name="attachable-checkbox"
+            checked={value.attachable ?? false}
+            onCheckedChange={checked => onChange({ ...value, attachable: checked === true })}
+          />
+          <Field orientation="horizontal">
+            <Label htmlFor="attachable-checkbox" className="ml-2">Attachable</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="xs">?</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>This network can be attached to after creation by standalone containers.</p>
+              </TooltipContent>
+            </Tooltip>
+          </Field>
+        </div>
+        <div className="flex flex-row justify-center items-center">
+          <Checkbox
+            id="external-checkbox"
+            name="external-checkbox"
+            checked={value.external ?? false}
+            onCheckedChange={checked => onChange({ ...value, external: checked === true })}
+          />
+          <Field orientation="horizontal">
+            <Label htmlFor="external-checkbox" className="ml-2">External</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="xs">?</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>This network already exists; Docker will not create it but use it instead.</p>
+              </TooltipContent>
+            </Tooltip>
+          </Field>
+        </div>
       </div>
     </div>
   );

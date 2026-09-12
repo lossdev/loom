@@ -126,8 +126,8 @@ export const Playground = () => {
         setAddTarget={setAddTarget}
         setSheetOpen={setSheetOpen}
       />
-      <div className="flex justify-center content-center items-center h-full w-full overflow-hidden">
-        <div className="h-90pct w-90pct dark:bg-playground-dark rounded-lg border-3 border-solid shadow-xl overflow-auto">
+      <div className="flex justify-center content-center items-center h-full w-full overflow-x-hidden">
+        <div className="h-90pct w-90pct dark:bg-playground-dark rounded-lg border-3 border-solid shadow-xl overflow-y-auto">
           {isEmpty ? (
             <div className="flex flex-row-reverse w-full h-10 mr-10 mt-10 animate-bounce-delayed">
               <img alt="Decorative arrow" src="/swoop-arrow.svg" className="ml-6 mr-3 h-12" aria-hidden="true" />

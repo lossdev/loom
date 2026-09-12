@@ -8,9 +8,14 @@ interface PillInputProps {
   onChange: (updated: string[]) => void;
   placeholder?: string;
   validate?: (val: string) => boolean;
+  // Set for ordered argument lists (entrypoint/command), where the same token
+  // may legitimately appear more than once.
+  allowDuplicates?: boolean;
+  // Splits one submission into several pills, e.g. a command line into argv.
+  tokenize?: (val: string) => string[];
 }
 
-export const PillInput = ({ value, onChange, placeholder, validate }: PillInputProps) => {
+export const PillInput = ({ id, value, onChange, placeholder, validate, allowDuplicates, tokenize }: PillInputProps) => {
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState(false);
 
@@ -21,8 +26,12 @@ export const PillInput = ({ value, onChange, placeholder, validate }: PillInputP
         setInputError(true);
         return;
       }
-      if (!value.includes(input.trim())) {
-        onChange([...value, input.trim()]);
+      const entries = tokenize ? tokenize(input.trim()) : [input.trim()];
+      const additions = allowDuplicates
+        ? entries
+        : entries.filter((entry, i) => !value.includes(entry) && entries.indexOf(entry) === i);
+      if (additions.length > 0) {
+        onChange([...value, ...additions]);
       }
       setInputError(false);
       setInput('');
@@ -35,6 +44,7 @@ export const PillInput = ({ value, onChange, placeholder, validate }: PillInputP
   return (
     <div className="flex flex-col gap-2">
       <Input
+        id={id}
         value={input}
         aria-invalid={inputError}
         onChange={e => {
@@ -51,14 +61,14 @@ export const PillInput = ({ value, onChange, placeholder, validate }: PillInputP
       }
       {value.length > 0 && (
         <div className="flex flex-row flex-wrap gap-2">
-          {value.map((item) => (
-            <Badge key={item} variant="secondary" className="flex items-center gap-1">
+          {value.map((item, index) => (
+            <Badge key={`${index}-${item}`} variant="secondary" className="flex items-center gap-1">
               {item}
               <span
                 className="cursor-pointer"
                 onClick={e => {
                   e.stopPropagation();
-                  onChange(value.filter(v => v !== item));
+                  onChange(value.filter((_, i) => i !== index));
                 }}
               >
                 <X className="h-3 w-3 pointer-events-none" />

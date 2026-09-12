@@ -46,7 +46,7 @@ export const NetworkNode = ({ network, index, onRemove, onAddContainer, onClick,
         </span>
       </div>
       <span className="text-xs text-white/40 block">
-        {network.driver}{network.attachable ? ', attachable' : ''}
+        {network.driver}{network.attachable ? ', attachable' : ''}{network.external ? ', external' : ''}
       </span>
       <button
         type="button"

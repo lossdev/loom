@@ -1,0 +1,20 @@
+# Lint the staged TypeScript in the UI project. Anything staged elsewhere in the
+# repo (or a commit that touches no .ts/.tsx here) skips straight through.
+
+ui_dir="src/Loom/UI"
+
+staged=$(git diff --cached --name-only --diff-filter=ACM -z \
+  | tr '\0' '\n' \
+  | grep -E "^${ui_dir}/.*\.tsx?$")
+
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+# eslint runs from the UI project so it picks up eslint.config.js, so the paths
+# need to lose the repo-relative prefix. --no-warn-ignored keeps a staged file
+# under src/shadcn from tripping --max-warnings.
+echo "$staged" \
+  | sed "s|^${ui_dir}/||" \
+  | tr '\n' '\0' \
+  | (cd "$ui_dir" && xargs -0 npx eslint --no-warn-ignored --max-warnings=0)

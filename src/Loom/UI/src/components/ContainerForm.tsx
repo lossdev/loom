@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react';
 
-import { FieldError, Label } from '@shadcn/components/ui';
+import {
+  Button,
+  Field,
+  FieldError,
+  Label,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@shadcn/components/ui';
 
 import type { Container, ImageSearchResult, TagSearchResult } from '@/types';
 import { InputWithValidation, PillInput } from "@/components";
 import { useDebouncedValue } from "@/hooks";
+import {
+  describeRequestError,
+  describeResponseError,
+  isAbortError,
+  isValidPortMapping,
+  tokenizeArgs
+} from "@/lib";
 
 interface ContainerFormProps {
   value: Partial<Container>;
@@ -15,11 +30,6 @@ interface ContainerFormProps {
 }
 
 export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, error }: ContainerFormProps) => {
-  const validatePort = (val: string): boolean => {
-    const n = Number(val.trim());
-    return Number.isInteger(n) && n > 0 && n <= 65535;
-  };
-
   const validateKeyValuePair = (val: string): boolean => {
     const parts = val.split('=');
     return parts.length === 2 && parts[0].trim().length > 0 && parts[1].trim().length > 0;
@@ -35,13 +45,19 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
   };
 
   const [imageSuggestions, setImageSuggestions] = useState<ImageSearchResult[]>([]);
+  const [imageLookupError, setImageLookupError] = useState<string | null>(null);
   const [showImageSuggestions, setShowImageSuggestions] = useState(false);
   const debouncedImage = useDebouncedValue(value.image ?? '', 300);
 
   useEffect(() => {
     const query = debouncedImage.trim();
     if (query.length < 2) {
+      // Clearing a stale dropdown, not deriving new state, so the cascading-render
+      // concern behind this rule does not apply.
+      /* eslint-disable react-hooks/set-state-in-effect */
       setImageSuggestions([]);
+      setImageLookupError(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
@@ -52,13 +68,19 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
         const response = await fetch(`/api/lookup/images?query=${encodeURIComponent(query)}`, {
           signal: controller.signal,
         });
-        if (!response.ok) throw new Error(`Failed to search images: ${response.status}`);
+        if (!response.ok) {
+          setImageSuggestions([]);
+          setImageLookupError(await describeResponseError(response));
+          return;
+        }
         const data = await response.json();
         setImageSuggestions(data.results ?? []);
+        setImageLookupError(null);
       } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          setImageSuggestions([]);
-        }
+        // An abort is this effect superseding itself, not a failure worth showing.
+        if (isAbortError(err)) return;
+        setImageSuggestions([]);
+        setImageLookupError(describeRequestError(err));
       }
     })();
 
@@ -66,13 +88,17 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
   }, [debouncedImage]);
 
   const [tagSuggestions, setTagSuggestions] = useState<TagSearchResult[]>([]);
+  const [tagLookupError, setTagLookupError] = useState<string | null>(null);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const debouncedTag = useDebouncedValue(value.tag ?? '', 300);
 
   useEffect(() => {
     const image = debouncedImage.trim();
     if (image.length === 0) {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setTagSuggestions([]);
+      setTagLookupError(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
@@ -84,13 +110,18 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
           `/api/lookup/tags/search?image=${encodeURIComponent(image)}&query=${encodeURIComponent(debouncedTag.trim())}`,
           { signal: controller.signal }
         );
-        if (!response.ok) throw new Error(`Failed to search tags: ${response.status}`);
+        if (!response.ok) {
+          setTagSuggestions([]);
+          setTagLookupError(await describeResponseError(response));
+          return;
+        }
         const data = await response.json();
         setTagSuggestions(data.results ?? []);
+        setTagLookupError(null);
       } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          setTagSuggestions([]);
-        }
+        if (isAbortError(err)) return;
+        setTagSuggestions([]);
+        setTagLookupError(describeRequestError(err));
       }
     })();
 
@@ -138,8 +169,13 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
               validate={validateImage}
               autoComplete="off"
             />
-            {showImageSuggestions && imageSuggestions.length > 0 && (
+            {showImageSuggestions && (imageLookupError !== null || imageSuggestions.length > 0) && (
               <ul className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-input bg-popover text-popover-foreground shadow-lg">
+                {imageLookupError !== null && (
+                  <li className="px-3 py-2 text-sm text-destructive">
+                    Couldn't load image suggestions &mdash; {imageLookupError}
+                  </li>
+                )}
                 {imageSuggestions.map(suggestion => (
                   <li key={suggestion.name}>
                     <button
@@ -180,8 +216,13 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
               placeholder="latest"
               autoComplete="off"
             />
-            {showTagSuggestions && tagSuggestions.length > 0 && (
+            {showTagSuggestions && (tagLookupError !== null || tagSuggestions.length > 0) && (
               <ul className="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-input bg-popover text-popover-foreground shadow-lg">
+                {tagLookupError !== null && (
+                  <li className="px-3 py-2 text-sm text-destructive">
+                    Couldn't load tag suggestions &mdash; {tagLookupError}
+                  </li>
+                )}
                 {tagSuggestions.map(suggestion => (
                   <li key={suggestion.name}>
                     <button
@@ -202,15 +243,65 @@ export const ContainerForm = ({ value, onChange, takenNames, onValidityChange, e
           </div>
         </div>
         <div className="grid gap-3">
-          <Label htmlFor="container-ports">Ports</Label>
+          <Field orientation="horizontal">
+            <Label htmlFor="container-entrypoint">Entrypoint</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="xs">?</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Overrides the image's entrypoint. Type it as you would in a shell and press Enter &mdash; it is split into separate arguments. Quote a value to keep its spaces.</p>
+              </TooltipContent>
+            </Tooltip>
+          </Field>
+          <PillInput
+            id="container-entrypoint"
+            value={value.entrypoint ?? []}
+            onChange={entrypoint => onChange({ ...value, entrypoint })}
+            placeholder="e.g. /bin/sh -c"
+            allowDuplicates
+            tokenize={tokenizeArgs}
+          />
+        </div>
+        <div className="grid gap-3">
+          <Field orientation="horizontal">
+            <Label htmlFor="container-command">Command</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="xs">?</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Overrides the image's default command. Type it as you would in a shell and press Enter &mdash; it is split into separate arguments. Quote a value to keep its spaces.</p>
+              </TooltipContent>
+            </Tooltip>
+          </Field>
+          <PillInput
+            id="container-command"
+            value={value.command ?? []}
+            onChange={command => onChange({ ...value, command })}
+            placeholder="e.g. npm run start"
+            allowDuplicates
+            tokenize={tokenizeArgs}
+          />
+        </div>
+        <div className="grid gap-3">
+          <Field orientation="horizontal">
+            <Label htmlFor="container-ports">Ports</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="xs">?</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>A single port is published on the identical host port. Use <code>host:container</code> to map mismatched ports &mdash; <code>80:8080</code> reaches container port 8080 on host port 80. Ranges (<code>3000-3005:3000-3005</code>), an interface (<code>127.0.0.1:80:8080</code>) and a protocol (<code>53:53/udp</code>) are also accepted.</p>
+              </TooltipContent>
+            </Tooltip>
+          </Field>
           <PillInput
             id="container-ports"
-            value={value.ports?.map(String) ?? []}
-            onChange={ports => {
-              onChange({ ...value, ports: ports.map(Number) });
-            }}
-            placeholder="e.g. 8080"
-            validate={validatePort}
+            value={value.ports ?? []}
+            onChange={ports => onChange({ ...value, ports })}
+            placeholder="e.g. 8080 or 80:8080"
+            validate={isValidPortMapping}
           />
         </div>
         <div className="grid gap-3">

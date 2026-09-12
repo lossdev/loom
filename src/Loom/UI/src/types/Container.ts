@@ -3,7 +3,9 @@ export interface Container {
   name: string;
   image: string;
   tag?: string;
-  ports?: number[];
+  ports?: string[];
+  command?: string[];
+  entrypoint?: string[];
   env?: Record<string, string>;
   annotations?: Record<string, string>;
   labels?: Record<string, string>;

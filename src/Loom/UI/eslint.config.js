@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // src/shadcn holds vendored shadcn/ui components; we don't lint code we don't own.
+  globalIgnores(['dist', 'src/shadcn']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

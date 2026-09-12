@@ -24,6 +24,18 @@ public class ServiceDefinition
 
     [YamlMember(Alias = "networks")]
     public List<string>? Networks { get; set; }
+    
+    [YamlMember(Alias = "command")]
+    public List<string>? Command { get; set; }
+    
+    [YamlMember(Alias = "entrypoint")]
+    public List<string>? Entrypoint { get; set; }
+    
+    [YamlMember(Alias = "annotations")]
+    public Dictionary<string, string>? Annotations { get; set; }
+    
+    [YamlMember(Alias = "labels")]
+    public Dictionary<string, string>? Labels { get; set; }
 }
 
 public class NetworkDefinition
@@ -33,4 +45,7 @@ public class NetworkDefinition
 
     [YamlMember(Alias = "attachable")]
     public bool? Attachable { get; set; }
+    
+    [YamlMember(Alias = "external")]
+    public bool? External { get; set; }
 }

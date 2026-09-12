@@ -5,5 +5,6 @@ export interface Network {
   name: string;
   driver: 'bridge' | 'host' | 'overlay' | 'none';
   attachable?: boolean;
+  external?: boolean;
   containers: Container[];
 }

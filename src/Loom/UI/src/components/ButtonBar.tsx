@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faNetworkWired, faPlus, faTools, faWandMagicSparkles, faCopy, faCheck, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import { faNetworkWired, faPlus, faTools, faWandMagicSparkles, faCopy, faCheck, faFloppyDisk, faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { faDocker } from "@fortawesome/free-brands-svg-icons";
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import yaml from 'react-syntax-highlighter/dist/esm/languages/hljs/yaml';
@@ -25,6 +25,7 @@ import {
   Spinner
 } from "@shadcn/components/ui";
 import type { AddTarget, Compose } from "@/types";
+import { describeRequestError, describeResponseError } from "@/lib";
 
 SyntaxHighlighter.registerLanguage('yaml', yaml);
 
@@ -39,6 +40,7 @@ interface ButtonBarProps {
 
 export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, setAddTarget, setSheetOpen }: ButtonBarProps) => {
   const [composeFile, setComposeFile] = useState<string>("");
+  const [composeError, setComposeError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -57,16 +59,24 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
     URL.revokeObjectURL(url);
   };
   
+  // Called without awaiting from the dialog's open handler, so failures have to
+  // land in state rather than escaping as an unhandled rejection.
   const generateCompose = async (compose: Compose) => {
-    const response = await fetch('/api/compose', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(compose),
-    });
+    try {
+      const response = await fetch('/api/compose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(compose),
+      });
 
-    // TODO: return error text in a friendly way
-    if (!response.ok) throw new Error(`Failed to generate compose: ${response.status}`);
-    setComposeFile(await response.text());
+      if (!response.ok) {
+        setComposeError(await describeResponseError(response));
+        return;
+      }
+      setComposeFile(await response.text());
+    } catch (err) {
+      setComposeError(describeRequestError(err));
+    }
   };
   
   return (
@@ -113,8 +123,8 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
         </div>
         { !isEmpty &&
           <Dialog onOpenChange={(open) => {
-            if (open) generateCompose(compose);
-            if (!open) { setCopied(false); setComposeFile(""); }
+            if (open) { setComposeError(null); generateCompose(compose); }
+            if (!open) { setCopied(false); setComposeFile(""); setComposeError(null); }
           }}>
             <DialogTrigger asChild>
               <Button variant="outline"
@@ -138,7 +148,15 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
                 >
                   { composeFile !== "" && <FontAwesomeIcon icon={copied ? faCheck : faCopy} /> }
                 </button>
-                { composeFile !== "" ?
+                { composeError !== null ?
+                  <div className="flex flex-row items-start text-destructive">
+                    <FontAwesomeIcon icon={faTriangleExclamation} className="mr-3 mt-1" />
+                    <div>
+                      <p>Couldn't generate your compose file.</p>
+                      <p className="text-sm text-muted-foreground mt-1">{composeError}</p>
+                    </div>
+                  </div> :
+                  composeFile !== "" ?
                   <SyntaxHighlighter
                     language="yaml"
                     style={atomOneDark}
@@ -150,7 +168,7 @@ export const ButtonBar = ({ compose, isEmpty, isDropdownOpen, setDropdownOpen, s
                 }
               </div>
               <DialogFooter>
-                <Button type="button" onClick={handleSave}><FontAwesomeIcon icon={faFloppyDisk} className="mr-1"/>Save</Button>
+                <Button type="button" onClick={handleSave} disabled={composeFile === ""}><FontAwesomeIcon icon={faFloppyDisk} className="mr-1"/>Save</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

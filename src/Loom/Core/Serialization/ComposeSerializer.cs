@@ -1,8 +1,9 @@
 namespace Loom.Core.Serialization;
 
+using Loom.Core.Models;
+
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Loom.Core.Models;
 
 public static class ComposeSerializer
 {
@@ -13,6 +14,11 @@ public static class ComposeSerializer
         var serializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+            // YAML 1.1 resolves HOST:CONTAINER as a base-60 integer whenever the
+            // container port is under 60, so a bare 2222:22 loads as a number rather
+            // than a port mapping. Quoting keeps such entries strings for the 1.1
+            // parsers still in circulation (PyYAML, Psych, go-yaml v2).
+            .WithQuotingNecessaryStrings(quoteYaml1_1Strings: true)
             .Build();
 
         return serializer.Serialize(composeFile);
@@ -41,7 +47,8 @@ public static class ComposeSerializer
                 n => new NetworkDefinition
                 {
                     Driver = n.Driver,
-                    Attachable = n.Attachable ?? null
+                    Attachable = n.Attachable ?? null,
+                    External = n.External ?? null,
                 })
             : null;
 
@@ -57,11 +64,21 @@ public static class ComposeSerializer
         return new ServiceDefinition
         {
             Image = container.Tag is { Length: > 0 } ? $"{container.Image}:{container.Tag}" : container.Image,
-            Ports = container.Ports is { Length: > 0 }
-                ? container.Ports.Select(p => $"{p}:{p}").ToList()
+            Ports = container.Ports?.Count > 0
+                ? container.Ports.Select(ExpandPort).ToList()
                 : null,
             Environment = container.Env?.Count > 0 ? container.Env : null,
-            Networks = networks
+            Networks = networks,
+            Command = container.Command?.Count > 0 ? container.Command : null,
+            Entrypoint = container.Entrypoint?.Count > 0 ? container.Entrypoint : null,
+            Labels = container.Labels?.Count > 0 ? container.Labels : null,
+            Annotations = container.Annotations?.Count > 0 ? container.Annotations : null,
         };
     }
+
+    // A bare port is shorthand for publishing on the identical host port; anything
+    // already carrying a host binding (host:container, ip:host:container) is passed
+    // through untouched.
+    private static string ExpandPort(string port) =>
+        port.Contains(':') ? port : $"{port}:{port}";
 }

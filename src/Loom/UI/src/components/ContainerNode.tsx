@@ -24,7 +24,7 @@ export const ContainerNode = ({ container, onRemove, onClick }: ContainerNodePro
           <span className="text-xs text-white/50 mt-6">{container.image}{container.tag ? `:${container.tag}` : ''}</span>
           {container.ports && container.ports.length > 0 && (
             <span className="text-xs text-white/40 mt-1">
-              {container.ports.map(p => `:${p}`).join(', ')}
+              {container.ports.map(p => p.includes(':') ? p : `:${p}`).join(', ')}
             </span>
           )}
         </div>
